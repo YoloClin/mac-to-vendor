@@ -1,0 +1,4 @@
+build/*
+dist/*
+jsel.egg-info/*
+*.egg-info/*

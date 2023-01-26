@@ -1,0 +1,38 @@
+#!/usr/bin/env python3
+import sys
+import subprocess
+
+def get_needle():
+  needle = None
+  if not sys.stdin.isatty():
+    needle = sys.stdin.read()
+  if len(sys.argv) == 2:
+    if needle:
+      return None
+    needle = sys.argv[-1]
+  if not needle:
+      return None
+  needle = needle.replace(":", "")
+  needle = needle.upper()
+  if len(needle) < 6:
+    return None
+  for i in range(0,6):
+    assert needle[i] in "0123456789ABCDEF"
+  if len(needle) > 6:
+    needle = needle[0:6]
+  return needle
+
+needle = get_needle()
+if not needle:
+    print("Usage: 'mac-to-vendor FF:FF:FF[:ff:ff:ff]', or 'echo $MAC | mac-to-vendor'")
+    sys.exit(1)
+
+proc = subprocess.Popen(["grep", needle, "/usr/share/nmap/nmap-mac-prefixes"], stdout=subprocess.PIPE)
+stdout, stderr = proc.communicate()
+s = stdout.decode().strip()
+
+if len(s) == 0:
+  print("MAC %s Not found" % needle)
+  sys.exit(1)
+
+print(s.split(" ", 1)[1])
